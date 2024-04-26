@@ -29,11 +29,11 @@ if df.loc[index_temperature, 'India Growing Season'].find(month) != -1:
     }
     document_id = "AgriBotDataUpdate1"
     db.collection("AgriBot").document(document_id).set(data)
-    print("Data added/updated successfully!")
+    # print("Data added/updated successfully!")
 else:
-    print("No harvestable crops available for the Season.")
+    # print("No harvestable crops available for the Season.")
     # Upload "No crops to harvest" to Firestore
     no_crops_data = {"Message": "No harvestable crops available for the Season."}
     document_id = "AgriBotDataUpdate1"
     db.collection("AgriBot").document(document_id).set(no_crops_data)
-    print("No crops data added/updated successfully!")
+    # print("No crops data added/updated successfully!")
