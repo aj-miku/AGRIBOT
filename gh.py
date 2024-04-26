@@ -8,7 +8,7 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 def run_voice_q_script():
-    subprocess.run(["python", "-c", f"import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/dark-d07/AgriBot/main/Voice_q.py').read())"]) # Replace "path/to/your/Voice_q.py" with the actual path
+    subprocess.run(["python", "-c", f"import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/aj-miku/AGRIBOT/main/Voice_q.py').read())"]) # Replace "path/to/your/Voice_q.py" with the actual path
 
 # def get_answer_from_firestore(question):
 #     try:
