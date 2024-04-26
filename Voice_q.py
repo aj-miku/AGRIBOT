@@ -12,7 +12,7 @@ def read_sample_data(filename):
     with open(filename, "r") as file:
         for line in file:
             question, answer = line.strip().split("|")
-            sample_data[question] = answer
+            sample_data[question.casefold()] = answer  # Store casefolded version of question
     return sample_data
 
 def get_field_condition():
@@ -23,16 +23,17 @@ def get_field_condition():
         if not field_data.get('Crops', ''):
             return "No harvestable crops available for the Season"
         else:
-            return f"Field Condition:\n\nCrops: {field_data.get('Crops', '')}\nDays to Maturity: {field_data.get('Days to Maturity', '')}\nHumidity (%): {field_data.get('Humidity (%)', '')}\nIndia Growing Season: {field_data.get('India Growing Season', '')}\nPH Value: {field_data.get('PH Value', '')}\nSoil Moisture (%): {field_data.get('Soil Moisture (%)', '')}\nTemperature (in Cel): {field_data.get('Temperature(in Cel)', '')}"
+            return f"Your Field Condition:\nYou can harvest {field_data.get('Crops', '')},\n It will take {field_data.get('Days to Maturity', '')} to Mature,\nThe Humidity is {field_data.get('Humidity (%)', '')},\nIndia Growing Season of {field_data.get('Crops', '')} is {field_data.get('India Growing Season', '')},\nPH Value is {field_data.get('PH Value', '')},\nThe Moisture in soil is {field_data.get('Soil Moisture (%)', '')},\nTodays Temperature is {field_data.get('Temperature(in Cel)', '')} celsius"
     else:
         return "Field condition data not available."
 
 def get_answer(question, sample_data):
-    if question.casefold() in sample_data:
-        return sample_data[question.casefold()]
-    elif question.casefold() == "what is my field condition" or question.casefold()=="what is my field condition?":
+    question_casefolded = question.casefold()  # Convert question to casefolded version
+    if question_casefolded in sample_data:
+        return sample_data[question_casefolded]
+    elif question_casefolded == "what is my field condition?" or question_casefolded == "what is my field condition":
         return get_field_condition()
-    elif question.casefold() == "what crop can i harvest this season?" or question.casefold()=="what crop can i harvest this season": 
+    elif question_casefolded == "what crop can i harvest this season?" or question_casefolded == "what crop can i harvest this season":
         doc_ref = db.collection("AgriBot").document("AgriBotDataUpdate1")
         doc = doc_ref.get()
         if doc.exists:
@@ -66,13 +67,22 @@ def receive_and_send_data():
 
     print("Data sent to Firestore successfully.")
 
-# Automatically run other Python files
-def run_other_scripts():
-    subprocess.run(["python", "FirebaseGetValues.py"])
-    subprocess.run(["python", "ProcessData.py"])
-    subprocess.run(["python", "FirebaseUpdateData.py"])
+# Automatically run other Python files if specific questions are asked
+def run_other_scripts_if_needed(question):
+    if question.casefold() in ["what is my field condition?", "what crop can i harvest this season?","what is my field condition","what crop can i harvest this season"]:
+        subprocess.run(["python", "FirebaseGetValues.py"])
+        subprocess.run(["python", "ProcessData.py"])
+        subprocess.run(["python", "FirebaseUpdateData.py"])
 
 if __name__ == "__main__":
     # Run your main function
-    run_other_scripts()
+    collection_ref = db.collection("AgriBot")
+    doc_ref = collection_ref.document("Questions")
+    doc = doc_ref.get()
+    if doc.exists:
+        received_question = doc.to_dict()["Question"]
+    else:
+        received_question = "No question found in Firestore"
+
+    run_other_scripts_if_needed(received_question)
     receive_and_send_data()
